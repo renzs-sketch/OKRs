@@ -46,6 +46,13 @@ const scoreColors: Record<number, string> = {
   5: 'bg-emerald-100 text-emerald-700 border-emerald-200',
 }
 
+function formatValue(val: string, type: string) {
+  if (!val) return '—'
+  if (type === '$') return `$${Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  if (type === '%') return `${val}%`
+  return val
+}
+
 function computeFormula(formula: string, values: Record<string, string>): string {
   try {
     let expr = formula
@@ -74,13 +81,6 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
   const metrics = okr.metrics || []
   const manualMetrics = metrics.filter(m => !m.calculated)
   const calculatedMetrics = metrics.filter(m => m.calculated)
-
-  function formatValue(val: string, type: string) {
-    if (!val) return '—'
-    if (type === '$') return `$${Number(val).toLocaleString()}`
-    if (type === '%') return `${val}%`
-    return val
-  }
 
   async function handleSubmit() {
     if (!updateText.trim()) return
