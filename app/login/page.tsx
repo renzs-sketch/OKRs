@@ -25,24 +25,30 @@ export default function LoginPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400&display=swap');
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        body { background: #EDE8E3; }
+
         .login-root {
           min-height: 100vh;
-          background-color: #F3F1EE;
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          padding: 40px 24px;
-          position: relative;
+          padding: 32px 24px;
+          background: #EDE8E3;
         }
 
         .login-card {
+          display: flex;
           width: 100%;
-          max-width: 400px;
+          max-width: 920px;
+          min-height: 560px;
+          background: #F5F2ED;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 8px 60px rgba(0,0,0,0.10);
           animation: fadeUp 0.6s ease forwards;
         }
 
@@ -51,58 +57,58 @@ export default function LoginPage() {
           to { opacity: 1; transform: translateY(0); }
         }
 
-        /* CHO VENTURES logo block */
-        .brand-logo {
-          text-align: center;
-          margin-bottom: 40px;
+        /* LEFT PANEL */
+        .left-panel {
+          flex: 0 0 420px;
+          padding: 48px 44px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
         }
 
-        .brand-logo-name {
+        .brand-mark {
           font-family: 'Cormorant Garamond', serif;
-          font-weight: 600;
-          font-size: 22px;
-          letter-spacing: 0.22em;
-          color: #2C2A27;
+          font-weight: 500;
+          font-size: 13px;
+          letter-spacing: 0.25em;
+          color: #6B6560;
           text-transform: uppercase;
-          display: block;
         }
 
-        .brand-logo-rule {
-          width: 32px;
-          height: 1px;
-          background: #9B9B7C;
-          margin: 8px auto 0;
+        .brand-mark span {
+          color: #B8A898;
+          margin-right: 4px;
         }
 
-        /* Title block */
-        .title-block {
-          text-align: center;
-          margin-bottom: 40px;
+        .form-section {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 32px 0;
         }
 
-        .title-main {
+        .form-title {
+          font-family: 'Cormorant Garamond', serif;
+          font-weight: 400;
+          font-size: 36px;
+          color: #2C2824;
+          line-height: 1.1;
+          margin-bottom: 4px;
+          letter-spacing: 0.02em;
+        }
+
+        .form-title-caps {
           font-family: 'Cormorant Garamond', serif;
           font-weight: 300;
-          font-size: 42px;
-          letter-spacing: 0.15em;
-          color: #2C2A27;
+          font-size: 11px;
+          letter-spacing: 0.3em;
+          color: #A89E94;
           text-transform: uppercase;
           display: block;
-          line-height: 1;
+          margin-bottom: 32px;
         }
 
-        .title-sub {
-          font-family: 'DM Sans', sans-serif;
-          font-weight: 300;
-          font-size: 9px;
-          letter-spacing: 0.35em;
-          color: #9B9B7C;
-          text-transform: uppercase;
-          display: block;
-          margin-top: 10px;
-        }
-
-        /* Form */
         .form-group {
           margin-bottom: 16px;
         }
@@ -111,131 +117,180 @@ export default function LoginPage() {
           display: block;
           font-family: 'DM Sans', sans-serif;
           font-weight: 300;
-          font-size: 9px;
-          letter-spacing: 0.3em;
-          color: #9B9B7C;
+          font-size: 10px;
+          letter-spacing: 0.25em;
+          color: #A89E94;
           text-transform: uppercase;
           margin-bottom: 8px;
         }
 
         .form-input {
           width: 100%;
-          background: #EDEAE6;
-          border: 1px solid #DEDAD5;
-          padding: 13px 16px;
+          background: #EDE9E4;
+          border: 1px solid #DDD8D2;
+          padding: 12px 14px;
           font-family: 'DM Sans', sans-serif;
           font-weight: 300;
           font-size: 13px;
-          color: #2C2A27;
+          color: #2C2824;
           outline: none;
           transition: border-color 0.2s;
-          border-radius: 0;
-          -webkit-appearance: none;
+          border-radius: 4px;
         }
 
-        .form-input::placeholder {
-          color: #C0BBB4;
-        }
-
-        .form-input:focus {
-          border-color: #74685D;
-        }
+        .form-input::placeholder { color: #C4BEB7; }
+        .form-input:focus { border-color: #9B8E82; }
 
         .form-error {
           font-family: 'DM Sans', sans-serif;
           font-size: 12px;
-          color: #8B5E3C;
+          color: #9B5A3C;
           margin-top: 12px;
           padding: 10px 14px;
-          background: #F0EAE3;
+          background: #F2EAE4;
           border: 1px solid #DDD0C4;
+          border-radius: 4px;
         }
 
         .form-submit {
           width: 100%;
-          margin-top: 24px;
-          background: #2C2A27;
-          color: #F3F1EE;
+          margin-top: 20px;
+          background: #2C2824;
+          color: #F5F2ED;
           border: none;
-          padding: 15px;
+          padding: 14px;
           font-family: 'DM Sans', sans-serif;
           font-weight: 400;
           font-size: 11px;
-          letter-spacing: 0.25em;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
           cursor: pointer;
           transition: background 0.2s;
-          border-radius: 0;
+          border-radius: 4px;
         }
 
-        .form-submit:hover:not(:disabled) {
-          background: #74685D;
-        }
-
-        .form-submit:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
+        .form-submit:hover:not(:disabled) { background: #9B8E82; }
+        .form-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .form-footer {
-          text-align: center;
-          margin-top: 24px;
           font-family: 'DM Sans', sans-serif;
           font-weight: 300;
           font-size: 10px;
-          letter-spacing: 0.15em;
-          color: #B0AB9E;
+          letter-spacing: 0.1em;
+          color: #C4BEB7;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+          flex: 1;
+          position: relative;
+          overflow: hidden;
+          min-height: 400px;
+        }
+
+        .right-panel img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          display: block;
+        }
+
+        /* Soft gradient overlay blending into left panel */
+        .right-panel::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to right, #F5F2ED 0%, transparent 18%);
+          z-index: 1;
+          pointer-events: none;
+        }
+
+        /* Bottom text overlay */
+        .right-panel-caption {
+          position: absolute;
+          bottom: 24px;
+          right: 24px;
+          z-index: 2;
+          text-align: right;
+        }
+
+        .right-panel-caption p {
+          font-family: 'Cormorant Garamond', serif;
+          font-style: italic;
+          font-weight: 300;
+          font-size: 12px;
+          color: rgba(255,255,255,0.7);
+          letter-spacing: 0.05em;
+        }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+          .right-panel { display: none; }
+          .left-panel { flex: 1; }
+          .login-card { max-width: 440px; }
         }
       `}</style>
 
       <div className="login-root">
         <div className="login-card">
 
-          {/* CHO VENTURES Logo */}
-          <div className="brand-logo">
-            <span className="brand-logo-name">Cho Ventures</span>
-            <div className="brand-logo-rule" />
-          </div>
-
-          {/* Title */}
-          <div className="title-block">
-            <span className="title-main">OKR PULSE</span>
-            <span className="title-sub">Weekly Management Report</span>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label className="form-label">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-                className="form-input"
-                placeholder="you@company.com"
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-                className="form-input"
-                placeholder="••••••••"
-              />
+          {/* Left: Form */}
+          <div className="left-panel">
+            <div className="brand-mark">
+              <span>·</span>Cho Ventures
             </div>
 
-            {error && <div className="form-error">{error}</div>}
+            <div className="form-section">
+              <h1 className="form-title">Welcome back.</h1>
+              <span className="form-title-caps">OKR Pulse · Weekly Management Report</span>
 
-            <button type="submit" disabled={loading} className="form-submit">
-              {loading ? 'Signing In...' : 'Sign In'}
-            </button>
-          </form>
+              <form onSubmit={handleLogin}>
+                <div className="form-group">
+                  <label className="form-label">Email</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                    className="form-input"
+                    placeholder="you@company.com"
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Password</label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    className="form-input"
+                    placeholder="••••••••"
+                  />
+                </div>
 
-          <p className="form-footer">Access by invitation only</p>
+                {error && <div className="form-error">{error}</div>}
+
+                <button type="submit" disabled={loading} className="form-submit">
+                  {loading ? 'Signing In...' : 'Sign In'}
+                </button>
+              </form>
+            </div>
+
+            <p className="form-footer">Access by invitation only</p>
+          </div>
+
+          {/* Right: Urban mural image */}
+          <div className="right-panel">
+            <img
+              src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=900&q=80&fit=crop"
+              alt="Urban art"
+            />
+            <div className="right-panel-caption">
+              <p>Art moves the city forward.</p>
+            </div>
+          </div>
+
         </div>
       </div>
     </>
