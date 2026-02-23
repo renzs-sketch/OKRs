@@ -1,5 +1,18 @@
 import type { Metadata } from 'next'
+import { Plus_Jakarta_Sans, Roboto_Mono } from 'next/font/google'
 import './globals.css'
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+})
+
+const robotoMono = Roboto_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'OKR Pulse',
@@ -9,7 +22,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className={`${jakarta.variable} ${robotoMono.variable}`}>{children}</body>
     </html>
   )
 }
