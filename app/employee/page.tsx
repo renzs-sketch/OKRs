@@ -1,31 +1,27 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { getCurrentWeek } from '@/lib/utils'
 import OKRCard from '@/components/OKRCard'
 
 export default async function EmployeePage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
 
   const { weekStart, weekEnd, weekLabel } = getCurrentWeek()
 
-  // Get employee's OKRs
-  const { data: okrs } = await supabase
+  const { data: okrs } = user ? await supabase
     .from('okrs')
     .select('*')
     .eq('assigned_to', user.id)
     .eq('is_active', true)
-    .order('created_at')
+    .order('created_at') : { data: [] }
 
-  // Get this week's updates for these OKRs
   const okrIds = okrs?.map(o => o.id) || []
-  const { data: updates } = await supabase
+  const { data: updates } = okrIds.length > 0 ? await supabase
     .from('weekly_updates')
     .select('*')
     .in('okr_id', okrIds)
     .gte('week_start', weekStart)
-    .lte('week_start', weekEnd)
+    .lte('week_start', weekEnd) : { data: [] }
 
   const updatesByOkr = (updates || []).reduce((acc, u) => {
     acc[u.okr_id] = u
@@ -38,14 +34,11 @@ export default async function EmployeePage() {
 
   return (
     <div>
-      {/* Header */}
       <div className="mb-10 animate-fadeUp">
         <p className="text-xs font-medium text-muted uppercase tracking-widest mb-1">{weekLabel}</p>
         <h1 className="font-display text-4xl font-bold text-ink">Your OKRs</h1>
         <p className="text-muted mt-2 text-sm">Submit your weekly update for each objective below.</p>
       </div>
-
-      {/* Progress bar */}
       <div className="mb-8 animate-fadeUp delay-1">
         <div className="flex justify-between items-center mb-2">
           <span className="text-xs text-muted">Weekly submission progress</span>
@@ -61,8 +54,6 @@ export default async function EmployeePage() {
           <p className="text-success text-xs mt-2 font-medium">✓ All updates submitted for this week</p>
         )}
       </div>
-
-      {/* OKR Cards */}
       <div className="space-y-4">
         {okrs?.length === 0 && (
           <div className="text-center py-20 text-muted">
