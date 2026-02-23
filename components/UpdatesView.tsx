@@ -161,7 +161,7 @@ export default function UpdatesView({ updates, okrs, profiles, mgmtReports, week
                       <p className="text-sm text-ink leading-relaxed mb-2">{mgmtReport.report_text}</p>
                     )}
                     {mgmtReport.attachment_url && (
-                      
+                      <a
                         href={mgmtReport.attachment_url}
                         target="_blank"
                         rel="noopener noreferrer"
