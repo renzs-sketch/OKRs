@@ -214,20 +214,19 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
                       <label className="block text-xs text-muted mb-1">{m.name}</label>
                       <div className="flex items-center gap-1">
                         {m.type === '$' && <span className="text-sm text-muted">$</span>}
-                        <input
-                          type="number"
-                          value={m.goal ? m.goal : (metricValues[m.name] || '')}
-                          onChange={e => {
-                            if (!m.goal) setMetricValues({ ...metricValues, [m.name]: e.target.value })
-                          }}
-                          readOnly={!!m.goal}
-                          className={`flex-1 border rounded-sm px-3 py-2 text-sm focus:outline-none transition-colors ${
-                            m.goal
-                              ? 'bg-surface-2 border-surface-2 text-muted cursor-not-allowed'
-                              : 'bg-surface border-surface-2 text-ink focus:border-accent'
-                          }`}
-                          placeholder={`Enter current ${m.type === '%' ? 'percentage' : m.type === '$' ? 'amount' : 'value'}`}
-                        />
+                        {m.goal ? (
+                          <div className="flex-1 border border-surface-2 rounded-sm px-3 py-2 text-sm text-muted bg-surface-2 cursor-not-allowed">
+                            {formatValue(m.goal, m.type)}
+                          </div>
+                        ) : (
+                          <input
+                            type="number"
+                            value={metricValues[m.name] || ''}
+                            onChange={e => setMetricValues({ ...metricValues, [m.name]: e.target.value })}
+                            className="flex-1 bg-surface border border-surface-2 rounded-sm px-3 py-2 text-sm text-ink focus:outline-none focus:border-accent transition-colors"
+                            placeholder={`Enter current ${m.type === '%' ? 'percentage' : m.type === '$' ? 'amount' : 'value'}`}
+                          />
+                        )}
                         {m.type === '%' && <span className="text-sm text-muted">%</span>}
                       </div>
                       {m.goal && (
