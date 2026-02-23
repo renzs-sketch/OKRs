@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentWeek } from '@/lib/utils'
 import Link from 'next/link'
+import UpdatesView from '@/components/UpdatesView'
 
 export default async function AdminDashboard() {
   const supabase = createClient()
@@ -22,7 +23,6 @@ export default async function AdminDashboard() {
     .gte('week_start', weekStart)
     .lte('week_start', weekEnd)
 
-  // Support requests
   const supportRequests = updates?.filter(u => u.needs_support) || []
 
   const totalOkrs = okrs?.length || 0
@@ -40,21 +40,6 @@ export default async function AdminDashboard() {
     ? (updates.reduce((sum, u) => sum + u.progress_score, 0) / updates.length).toFixed(1)
     : '—'
 
-  const entityMap: Record<string, { submitted: number; total: number; avgScore: number }> = {}
-  okrs?.forEach(okr => {
-    const entity = (okr as any).profiles?.entity || 'Unknown'
-    if (!entityMap[entity]) entityMap[entity] = { submitted: 0, total: 0, avgScore: 0 }
-    entityMap[entity].total++
-  })
-  updates?.forEach(u => {
-    const okr = okrs?.find(o => o.id === u.okr_id)
-    const entity = (okr as any)?.profiles?.entity || 'Unknown'
-    if (entityMap[entity]) {
-      entityMap[entity].submitted++
-      entityMap[entity].avgScore += u.progress_score
-    }
-  })
-
   return (
     <div>
       <div className="mb-10 animate-fadeUp">
@@ -63,7 +48,7 @@ export default async function AdminDashboard() {
         <p className="text-muted mt-2 text-sm">Weekly OKR submission overview across all entities.</p>
       </div>
 
-      {/* NEEDS TONY'S SUPPORT — shown first, only if there are requests */}
+      {/* NEEDS TONY'S SUPPORT */}
       {supportRequests.length > 0 && (
         <div className="mb-10 animate-fadeUp">
           <div className="flex items-center gap-3 mb-4">
@@ -117,34 +102,16 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
+        {/* Updates View — By DRI or By Entity */}
         <div className="animate-fadeUp delay-2">
-          <h2 className="font-display text-xl font-semibold text-ink mb-4">By Entity</h2>
-          <div className="space-y-3">
-            {Object.entries(entityMap).map(([entity, data]) => {
-              const rate = data.total > 0 ? Math.round((data.submitted / data.total) * 100) : 0
-              const avg = data.submitted > 0 ? (data.avgScore / data.submitted).toFixed(1) : '—'
-              return (
-                <div key={entity} className="bg-white border border-surface-2 rounded-sm p-4">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium text-sm text-ink">{entity}</span>
-                    <div className="flex gap-3 text-xs text-muted">
-                      <span>Avg: <strong className="text-ink">{avg}</strong></span>
-                      <span>{data.submitted}/{data.total}</span>
-                    </div>
-                  </div>
-                  <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-700 ${rate === 100 ? 'bg-success' : rate >= 50 ? 'bg-warning' : 'bg-accent'}`}
-                      style={{ width: `${rate}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-muted mt-1">{rate}% submitted</p>
-                </div>
-              )
-            })}
-          </div>
+          <UpdatesView
+            updates={updates || []}
+            okrs={okrs || []}
+            profiles={profiles || []}
+          />
         </div>
 
+        {/* Pending Submissions */}
         <div className="animate-fadeUp delay-3">
           <h2 className="font-display text-xl font-semibold text-ink mb-4">Pending Submissions</h2>
           {missingSubmissions?.length === 0 ? (
