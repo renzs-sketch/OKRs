@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Plus_Jakarta_Sans, Roboto_Mono } from 'next/font/google'
+import { Plus_Jakarta_Sans, Comfortaa } from 'next/font/google'
 import './globals.css'
 
 const jakarta = Plus_Jakarta_Sans({
@@ -8,7 +8,7 @@ const jakarta = Plus_Jakarta_Sans({
   display: 'swap',
 })
 
-const robotoMono = Roboto_Mono({
+const robotoMono = Comfortaa({
   subsets: ['latin'],
   variable: '--font-mono',
   display: 'swap',
