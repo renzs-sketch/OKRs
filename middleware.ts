@@ -22,25 +22,10 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-
   const { pathname } = request.nextUrl
 
-  // Redirect unauthenticated users to login
   if (!user && pathname !== '/login') {
     return NextResponse.redirect(new URL('/login', request.url))
-  }
-
-  // Redirect logged-in users away from login page
-  if (user && pathname === '/login') {
-    const isAdmin = user.email === 'renz@cho.ventures'
-    return NextResponse.redirect(new URL(isAdmin ? '/admin' : '/employee', request.url))
-  }
-
-  // Protect admin routes
-  if (user && pathname.startsWith('/admin')) {
-    if (user.email !== 'renz@cho.ventures') {
-      return NextResponse.redirect(new URL('/employee', request.url))
-    }
   }
 
   return supabaseResponse
