@@ -1,14 +1,7 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import LogoutButton from '@/components/LogoutButton'
+import Link from 'next/link'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-  if (user.email !== process.env.ADMIN_EMAIL) redirect('/employee')
-
   return (
     <div className="min-h-screen bg-paper">
       <nav className="border-b border-surface-2 bg-paper sticky top-0 z-10">
