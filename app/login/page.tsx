@@ -22,7 +22,7 @@ export default function LoginPage() {
       return
     }
 
-    window.location.href = '/admin'
+    window.location.href = email === 'renz@cho.ventures' ? '/admin' : '/employee'
   }
 
   return (
