@@ -57,7 +57,6 @@ export default function LoginPage() {
           to { opacity: 1; transform: translateY(0); }
         }
 
-        /* LEFT PANEL */
         .left-panel {
           flex: 0 0 420px;
           padding: 48px 44px;
@@ -69,9 +68,9 @@ export default function LoginPage() {
         .brand-mark {
           font-family: 'Cormorant Garamond', serif;
           font-weight: 500;
-          font-size: 13px;
-          letter-spacing: 0.25em;
-          color: #6B6560;
+          font-size: 15px;
+          letter-spacing: 0.3em;
+          color: #2C2824;
           text-transform: uppercase;
         }
 
@@ -91,19 +90,19 @@ export default function LoginPage() {
         .form-title {
           font-family: 'Cormorant Garamond', serif;
           font-weight: 400;
-          font-size: 36px;
-          color: #2C2824;
+          font-size: 28px;
+          color: #8C8279;
           line-height: 1.1;
-          margin-bottom: 4px;
+          margin-bottom: 6px;
           letter-spacing: 0.02em;
         }
 
-        .form-title-caps {
-          font-family: 'Cormorant Garamond', serif;
+        .form-tagline {
+          font-family: 'DM Sans', sans-serif;
           font-weight: 300;
           font-size: 11px;
-          letter-spacing: 0.3em;
-          color: #A89E94;
+          letter-spacing: 0.2em;
+          color: #C4BEB7;
           text-transform: uppercase;
           display: block;
           margin-bottom: 32px;
@@ -180,7 +179,6 @@ export default function LoginPage() {
           color: #C4BEB7;
         }
 
-        /* RIGHT PANEL */
         .right-panel {
           flex: 1;
           position: relative;
@@ -196,7 +194,6 @@ export default function LoginPage() {
           display: block;
         }
 
-        /* Soft gradient overlay blending into left panel */
         .right-panel::before {
           content: '';
           position: absolute;
@@ -206,7 +203,6 @@ export default function LoginPage() {
           pointer-events: none;
         }
 
-        /* Bottom text overlay */
         .right-panel-caption {
           position: absolute;
           bottom: 24px;
@@ -224,7 +220,6 @@ export default function LoginPage() {
           letter-spacing: 0.05em;
         }
 
-        /* Responsive */
         @media (max-width: 700px) {
           .right-panel { display: none; }
           .left-panel { flex: 1; }
@@ -235,7 +230,6 @@ export default function LoginPage() {
       <div className="login-root">
         <div className="login-card">
 
-          {/* Left: Form */}
           <div className="left-panel">
             <div className="brand-mark">
               <span>·</span>Cho Ventures
@@ -243,7 +237,7 @@ export default function LoginPage() {
 
             <div className="form-section">
               <h1 className="form-title">Welcome back.</h1>
-              <span className="form-title-caps">OKR Pulse · Weekly Management Report</span>
+              <span className="form-tagline">Weekly accountability, simplified.</span>
 
               <form onSubmit={handleLogin}>
                 <div className="form-group">
@@ -280,14 +274,13 @@ export default function LoginPage() {
             <p className="form-footer">Access by invitation only</p>
           </div>
 
-          {/* Right: Urban mural image */}
           <div className="right-panel">
             <img
-              src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=900&q=80&fit=crop"
-              alt="Urban art"
+              src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80&fit=crop"
+              alt="Nature"
             />
             <div className="right-panel-caption">
-              <p>Art moves the city forward.</p>
+              <p>Weekly accountability, simplified.</p>
             </div>
           </div>
 
