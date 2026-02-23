@@ -1,36 +1,56 @@
-import { createClient } from '@/lib/supabase/server'
+'use client'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { getCurrentWeek } from '@/lib/utils'
 import OKRCard from '@/components/OKRCard'
 
-export default async function EmployeePage() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
+export default function EmployeePage() {
+  const [okrs, setOkrs] = useState<any[]>([])
+  const [updates, setUpdates] = useState<Record<string, any>>({})
+  const [loading, setLoading] = useState(true)
   const { weekStart, weekEnd, weekLabel } = getCurrentWeek()
+  const supabase = createClient()
 
-  const { data: okrs } = user ? await supabase
-    .from('okrs')
-    .select('*')
-    .eq('assigned_to', user.id)
-    .eq('is_active', true)
-    .order('created_at') : { data: [] }
+  useEffect(() => {
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-  const okrIds = okrs?.map(o => o.id) || []
-  const { data: updates } = okrIds.length > 0 ? await supabase
-    .from('weekly_updates')
-    .select('*')
-    .in('okr_id', okrIds)
-    .gte('week_start', weekStart)
-    .lte('week_start', weekEnd) : { data: [] }
+      const { data: okrData } = await supabase
+        .from('okrs')
+        .select('*')
+        .eq('assigned_to', user.id)
+        .eq('is_active', true)
+        .order('created_at')
 
-  const updatesByOkr = (updates || []).reduce((acc, u) => {
-    acc[u.okr_id] = u
-    return acc
-  }, {} as Record<string, any>)
+      setOkrs(okrData || [])
 
-  const submittedCount = Object.keys(updatesByOkr).length
-  const totalCount = okrs?.length || 0
+      if (okrData && okrData.length > 0) {
+        const ids = okrData.map(o => o.id)
+        const { data: updateData } = await supabase
+          .from('weekly_updates')
+          .select('*')
+          .in('okr_id', ids)
+          .gte('week_start', weekStart)
+          .lte('week_start', weekEnd)
+
+        const map = (updateData || []).reduce((acc, u) => {
+          acc[u.okr_id] = u
+          return acc
+        }, {} as Record<string, any>)
+        setUpdates(map)
+      }
+
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const submittedCount = Object.keys(updates).length
+  const totalCount = okrs.length
   const allSubmitted = submittedCount === totalCount && totalCount > 0
+
+  if (loading) return <div className="text-center py-20 text-muted">Loading...</div>
 
   return (
     <div>
@@ -55,17 +75,17 @@ export default async function EmployeePage() {
         )}
       </div>
       <div className="space-y-4">
-        {okrs?.length === 0 && (
+        {okrs.length === 0 && (
           <div className="text-center py-20 text-muted">
             <p className="font-display text-xl">No OKRs assigned yet.</p>
             <p className="text-sm mt-2">Your admin will assign objectives soon.</p>
           </div>
         )}
-        {okrs?.map((okr, i) => (
+        {okrs.map((okr, i) => (
           <OKRCard
             key={okr.id}
             okr={okr}
-            existingUpdate={updatesByOkr[okr.id] || null}
+            existingUpdate={updates[okr.id] || null}
             weekStart={weekStart}
             delay={i + 2}
           />
