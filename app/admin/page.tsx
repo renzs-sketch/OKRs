@@ -6,24 +6,24 @@ export default async function AdminDashboard() {
   const supabase = createClient()
   const { weekStart, weekEnd, weekLabel } = getCurrentWeek()
 
-  // Get all employees (profiles)
   const { data: profiles } = await supabase
     .from('profiles')
     .select('*')
     .order('full_name')
 
-  // Get all active OKRs
   const { data: okrs } = await supabase
     .from('okrs')
     .select('*, profiles(full_name, entity)')
     .eq('is_active', true)
 
-  // Get this week's updates
   const { data: updates } = await supabase
     .from('weekly_updates')
-    .select('*, okrs(title, assigned_to), profiles(full_name)')
+    .select('*, okrs(title, assigned_to, okr_id), profiles(full_name)')
     .gte('week_start', weekStart)
     .lte('week_start', weekEnd)
+
+  // Support requests
+  const supportRequests = updates?.filter(u => u.needs_support) || []
 
   const totalOkrs = okrs?.length || 0
   const totalUpdates = updates?.length || 0
@@ -63,6 +63,44 @@ export default async function AdminDashboard() {
         <p className="text-muted mt-2 text-sm">Weekly OKR submission overview across all entities.</p>
       </div>
 
+      {/* NEEDS TONY'S SUPPORT — shown first, only if there are requests */}
+      {supportRequests.length > 0 && (
+        <div className="mb-10 animate-fadeUp">
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="font-display text-xl font-semibold text-ink">🚩 Needs Tony's Support</h2>
+            <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">
+              {supportRequests.length} this week
+            </span>
+          </div>
+          <div className="space-y-3">
+            {supportRequests.map(u => {
+              const okr = okrs?.find(o => o.id === u.okr_id)
+              const employee = profiles?.find(p => p.id === u.user_id)
+              return (
+                <div key={u.id} className="bg-white border border-red-200 rounded-sm p-5">
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div>
+                      <p className="font-medium text-sm text-ink">{employee?.full_name}</p>
+                      <p className="text-xs text-muted">{employee?.entity} · {(okr as any)?.okr_id} · {okr?.title}</p>
+                    </div>
+                    <span className="text-xs bg-red-50 text-red-500 border border-red-200 px-2 py-1 rounded-sm shrink-0">
+                      Support Needed
+                    </span>
+                  </div>
+                  {u.support_details && (
+                    <div className="bg-red-50 rounded-sm px-4 py-3">
+                      <p className="text-xs text-red-500 uppercase tracking-widest mb-1">What they need</p>
+                      <p className="text-sm text-red-700">{u.support_details}</p>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10 animate-fadeUp delay-1">
         {[
           { label: 'Submission Rate', value: `${submissionRate}%`, sub: `${totalUpdates} of ${totalOkrs} OKRs` },
