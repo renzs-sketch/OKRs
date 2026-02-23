@@ -24,16 +24,13 @@ export default function LoginPage() {
       return
     }
 
-    const isAdmin = data.user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL
-    router.push(isAdmin ? '/admin' : '/employee')
+    router.push('/admin')
     router.refresh()
   }
 
   return (
     <div className="min-h-screen bg-paper flex items-center justify-center p-6">
       <div className="w-full max-w-md animate-fadeUp">
-
-        {/* Logo / Brand */}
         <div className="mb-12 text-center">
           <div className="inline-flex items-center justify-center w-12 h-12 bg-accent rounded-sm mb-6">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -43,8 +40,6 @@ export default function LoginPage() {
           <h1 className="font-display text-3xl font-bold text-ink">OKR Pulse</h1>
           <p className="text-muted text-sm mt-2">Weekly accountability, simplified</p>
         </div>
-
-        {/* Form */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-muted uppercase tracking-widest mb-2">
@@ -59,7 +54,6 @@ export default function LoginPage() {
               placeholder="you@company.com"
             />
           </div>
-
           <div>
             <label className="block text-xs font-medium text-muted uppercase tracking-widest mb-2">
               Password
@@ -73,11 +67,9 @@ export default function LoginPage() {
               placeholder="••••••••"
             />
           </div>
-
           {error && (
             <p className="text-accent text-sm bg-red-50 border border-red-100 rounded-sm px-3 py-2">{error}</p>
           )}
-
           <button
             type="submit"
             disabled={loading}
@@ -86,7 +78,6 @@ export default function LoginPage() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
-
         <p className="text-center text-xs text-muted mt-8">
           Access is by invitation only. Contact your administrator.
         </p>
