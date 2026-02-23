@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentWeek } from '@/lib/utils'
 import Link from 'next/link'
-import UpdatesView from '@/components/UpdatesView'
 
 export default async function AdminDashboard() {
   const supabase = createClient()
@@ -24,7 +23,6 @@ export default async function AdminDashboard() {
     .lte('week_start', weekEnd)
 
   const supportRequests = updates?.filter(u => u.needs_support) || []
-
   const totalOkrs = okrs?.length || 0
   const totalUpdates = updates?.length || 0
   const submissionRate = totalOkrs > 0 ? Math.round((totalUpdates / totalOkrs) * 100) : 0
@@ -48,7 +46,6 @@ export default async function AdminDashboard() {
         <p className="text-muted mt-2 text-sm">Weekly OKR submission overview across all entities.</p>
       </div>
 
-      {/* NEEDS TONY'S SUPPORT */}
       {supportRequests.length > 0 && (
         <div className="mb-10 animate-fadeUp">
           <div className="flex items-center gap-3 mb-4">
@@ -85,7 +82,6 @@ export default async function AdminDashboard() {
         </div>
       )}
 
-      {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10 animate-fadeUp delay-1">
         {[
           { label: 'Submission Rate', value: `${submissionRate}%`, sub: `${totalUpdates} of ${totalOkrs} OKRs` },
@@ -101,53 +97,40 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Updates View — By DRI or By Entity */}
-        <div className="animate-fadeUp delay-2">
-          <UpdatesView
-            updates={updates || []}
-            okrs={okrs || []}
-            profiles={profiles || []}
-          />
-        </div>
-
-        {/* Pending Submissions */}
-        <div className="animate-fadeUp delay-3">
-          <h2 className="font-display text-xl font-semibold text-ink mb-4">Pending Submissions</h2>
-          {missingSubmissions?.length === 0 ? (
-            <div className="bg-white border border-surface-2 rounded-sm p-8 text-center">
-              <p className="text-2xl mb-2">✓</p>
-              <p className="font-medium text-success">Everyone has submitted!</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {missingSubmissions?.map(p => {
-                const theirOkrs = okrs?.filter(o => o.assigned_to === p.id) || []
-                const theirUpdates = updates?.filter(u => u.user_id === p.id) || []
-                const remaining = theirOkrs.length - theirUpdates.length
-                return (
-                  <div key={p.id} className="bg-white border border-surface-2 rounded-sm px-4 py-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-ink">{p.full_name}</p>
-                      <p className="text-xs text-muted">{p.entity}</p>
-                    </div>
-                    <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-full font-medium">
-                      {remaining} pending
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          <div className="mt-6">
-            <Link
-              href="/admin/report"
-              className="block w-full text-center bg-ink text-paper py-3 rounded-sm text-sm font-medium hover:bg-accent transition-colors"
-            >
-              Generate AI Executive Report →
-            </Link>
+      <div className="animate-fadeUp delay-3">
+        <h2 className="font-display text-xl font-semibold text-ink mb-4">Pending Submissions</h2>
+        {missingSubmissions?.length === 0 ? (
+          <div className="bg-white border border-surface-2 rounded-sm p-8 text-center">
+            <p className="text-2xl mb-2">✓</p>
+            <p className="font-medium text-success">Everyone has submitted!</p>
           </div>
+        ) : (
+          <div className="space-y-2">
+            {missingSubmissions?.map(p => {
+              const theirOkrs = okrs?.filter(o => o.assigned_to === p.id) || []
+              const theirUpdates = updates?.filter(u => u.user_id === p.id) || []
+              const remaining = theirOkrs.length - theirUpdates.length
+              return (
+                <div key={p.id} className="bg-white border border-surface-2 rounded-sm px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-ink">{p.full_name}</p>
+                    <p className="text-xs text-muted">{p.entity}</p>
+                  </div>
+                  <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded-full font-medium">
+                    {remaining} pending
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+        <div className="mt-6">
+          <Link
+            href="/admin/report"
+            className="block w-full text-center bg-ink text-paper py-3 rounded-sm text-sm font-medium hover:bg-accent transition-colors"
+          >
+            Generate AI Executive Report →
+          </Link>
         </div>
       </div>
     </div>
