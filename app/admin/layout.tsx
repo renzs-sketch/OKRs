@@ -1,46 +1,35 @@
-import { createClient } from '@/lib/supabase/server'
-import { getCurrentWeek } from '@/lib/utils'
-import UpdatesView from '@/components/UpdatesView'
+import LogoutButton from '@/components/LogoutButton'
+import Link from 'next/link'
 
-export default async function EmployeeUpdatesPage() {
-  const supabase = createClient()
-  const { weekStart, weekEnd, weekLabel } = getCurrentWeek()
-
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('*')
-    .order('full_name')
-
-  const { data: okrs } = await supabase
-    .from('okrs')
-    .select('*')
-    .eq('is_active', true)
-
-  const { data: updates } = await supabase
-    .from('weekly_updates')
-    .select('*')
-    .gte('week_start', weekStart)
-    .lte('week_start', weekEnd)
-
-  const { data: mgmtReports } = await supabase
-    .from('management_reports')
-    .select('*, profiles(full_name, entity)')
-    .eq('week_start', weekStart)
-
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div>
-      <div className="mb-10 animate-fadeUp">
-        <p className="text-xs font-medium text-muted uppercase tracking-widest mb-1">{weekLabel}</p>
-        <h1 className="font-display text-4xl font-bold text-ink">Employee Updates</h1>
-        <p className="text-muted mt-2 text-sm">This week's OKR updates and management reports.</p>
-      </div>
-      <UpdatesView
-        updates={updates || []}
-        okrs={okrs || []}
-        profiles={profiles || []}
-        mgmtReports={mgmtReports || []}
-        weekLabel={weekLabel}
-      />
+    <div className="min-h-screen bg-paper">
+      <nav className="border-b border-surface-2 bg-paper sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-accent rounded-sm flex items-center justify-center">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <span className="font-display font-semibold text-ink">OKR Pulse</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Link href="/admin" className="text-xs px-3 py-1.5 rounded-sm text-ink hover:bg-surface transition-colors">Dashboard</Link>
+              <Link href="/admin/okrs" className="text-xs px-3 py-1.5 rounded-sm text-ink hover:bg-surface transition-colors">Manage OKRs</Link>
+              <Link href="/admin/employees" className="text-xs px-3 py-1.5 rounded-sm text-ink hover:bg-surface transition-colors">Employees</Link>
+              <Link href="/admin/updates" className="text-xs px-3 py-1.5 rounded-sm text-ink hover:bg-surface transition-colors">Employee Updates</Link>
+              <Link href="/admin/report" className="text-xs px-3 py-1.5 rounded-sm text-ink hover:bg-surface transition-colors">AI Report</Link>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted hidden sm:block">Admin</span>
+            <LogoutButton />
+          </div>
+        </div>
+      </nav>
+      <main className="max-w-6xl mx-auto px-6 py-10">{children}</main>
     </div>
   )
 }
