@@ -49,11 +49,9 @@ const scoreColors: Record<number, string> = {
 function computeFormula(formula: string, values: Record<string, string>): string {
   try {
     let expr = formula
-    // Replace metric names with their values
     Object.entries(values).forEach(([name, val]) => {
       expr = expr.replace(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), val || '0')
     })
-    // Only allow safe math
     if (!/^[\d\s\+\-\*\/\(\)\.]+$/.test(expr)) return '—'
     const result = Function('"use strict"; return (' + expr + ')')()
     return isFinite(result) ? Number(result).toFixed(2) : '—'
@@ -90,7 +88,6 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Compute calculated metric values before saving
     const finalMetricValues = { ...metricValues }
     calculatedMetrics.forEach(m => {
       finalMetricValues[m.name] = computeFormula(m.formula, metricValues)
@@ -131,7 +128,6 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
 
   return (
     <div className={`animate-fadeUp delay-${Math.min(delay, 4)} bg-white border border-surface-2 rounded-sm overflow-hidden`}>
-      {/* Card header */}
       <div className="px-6 pt-5 pb-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
@@ -155,7 +151,6 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
           )}
         </div>
 
-        {/* Key Results */}
         {okr.key_results?.length > 0 && (
           <div className="mt-3 space-y-1">
             {okr.key_results.map((kr, i) => (
@@ -167,7 +162,6 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
           </div>
         )}
 
-        {/* Metrics display (when submitted, not editing) */}
         {hasUpdate && !isEditing && metrics.length > 0 && existingUpdate.metric_values && (
           <div className="mt-4 pt-4 border-t border-surface-2">
             <p className="text-xs text-muted uppercase tracking-widest mb-2">Metrics This Week</p>
@@ -193,7 +187,6 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
         )}
       </div>
 
-      {/* Existing update display */}
       {hasUpdate && !isEditing && (
         <div className="px-6 pb-5 border-t border-surface-2 pt-4">
           <p className="text-sm text-ink leading-relaxed">{existingUpdate.update_text}</p>
@@ -206,11 +199,9 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
         </div>
       )}
 
-      {/* Update form */}
       {(!hasUpdate || isEditing) && (
         <div className="px-6 pb-5 border-t border-surface-2 pt-4 space-y-4">
 
-          {/* Metric inputs */}
           {metrics.length > 0 && (
             <div>
               <label className="block text-xs text-muted uppercase tracking-widest mb-3">
@@ -220,25 +211,32 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
                 {manualMetrics.map(m => (
                   <div key={m.name} className="flex items-center gap-3">
                     <div className="flex-1">
-                      <label className="block text-xs text-muted mb-1">
-                        {m.name} {m.goal ? `(Goal: ${formatValue(m.goal, m.type)})` : ''}
-                      </label>
+                      <label className="block text-xs text-muted mb-1">{m.name}</label>
                       <div className="flex items-center gap-1">
                         {m.type === '$' && <span className="text-sm text-muted">$</span>}
                         <input
                           type="number"
-                          value={metricValues[m.name] || ''}
-                          onChange={e => setMetricValues({ ...metricValues, [m.name]: e.target.value })}
-                          className="flex-1 bg-surface border border-surface-2 rounded-sm px-3 py-2 text-sm text-ink focus:outline-none focus:border-accent transition-colors"
+                          value={m.goal ? m.goal : (metricValues[m.name] || '')}
+                          onChange={e => {
+                            if (!m.goal) setMetricValues({ ...metricValues, [m.name]: e.target.value })
+                          }}
+                          readOnly={!!m.goal}
+                          className={`flex-1 border rounded-sm px-3 py-2 text-sm focus:outline-none transition-colors ${
+                            m.goal
+                              ? 'bg-surface-2 border-surface-2 text-muted cursor-not-allowed'
+                              : 'bg-surface border-surface-2 text-ink focus:border-accent'
+                          }`}
                           placeholder={`Enter current ${m.type === '%' ? 'percentage' : m.type === '$' ? 'amount' : 'value'}`}
                         />
                         {m.type === '%' && <span className="text-sm text-muted">%</span>}
                       </div>
+                      {m.goal && (
+                        <p className="text-xs text-muted mt-0.5">Goal — set by admin</p>
+                      )}
                     </div>
                   </div>
                 ))}
 
-                {/* Calculated metrics preview */}
                 {calculatedMetrics.length > 0 && (
                   <div className="pt-2 border-t border-surface-2">
                     <p className="text-xs text-muted mb-2">Auto-calculated:</p>
@@ -256,7 +254,6 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
             </div>
           )}
 
-          {/* Progress Score */}
           <div>
             <label className="block text-xs text-muted uppercase tracking-widest mb-2">
               Progress Score
@@ -280,7 +277,6 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
             <p className="text-xs text-muted mt-1">{SCORES.find(s => s.value === score)?.desc}</p>
           </div>
 
-          {/* Weekly Update */}
           <div>
             <label className="block text-xs text-muted uppercase tracking-widest mb-2">
               Weekly Update
