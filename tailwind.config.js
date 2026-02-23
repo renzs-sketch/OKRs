@@ -9,7 +9,8 @@ module.exports = {
     extend: {
       fontFamily: {
         display: ['var(--font-display)'],
-        body: ['var(--font-body)'],
+        body: ['var(--font-display)'],
+        mono: ['var(--font-mono)'],
       },
       colors: {
         ink: '#0D0D0D',
