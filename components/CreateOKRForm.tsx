@@ -235,8 +235,3 @@ export default function CreateOKRForm({ profiles }: { profiles: Profile[] }) {
     </form>
   )
 }
-```
-
-Go to:
-```
-https://github.com/renzs-sketch/OKRs/edit/main/components/CreateOKRForm.tsx
