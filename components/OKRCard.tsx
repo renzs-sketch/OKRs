@@ -25,6 +25,8 @@ interface OKRCardProps {
     progress_score: number
     submitted_at: string
     metric_values?: Record<string, string>
+    needs_support?: boolean
+    support_details?: string
   } | null
   weekStart: string
   delay: number
@@ -74,6 +76,8 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
   const [metricValues, setMetricValues] = useState<Record<string, string>>(
     existingUpdate?.metric_values || {}
   )
+  const [needsSupport, setNeedsSupport] = useState(existingUpdate?.needs_support || false)
+  const [supportDetails, setSupportDetails] = useState(existingUpdate?.support_details || '')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const supabase = createClient()
@@ -93,28 +97,24 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
       finalMetricValues[m.name] = computeFormula(m.formula, metricValues)
     })
 
+    const payload = {
+      update_text: updateText,
+      progress_score: score,
+      metric_values: finalMetricValues,
+      needs_support: needsSupport,
+      support_details: needsSupport ? supportDetails : null,
+      submitted_at: new Date().toISOString()
+    }
+
     if (existingUpdate) {
-      await supabase
-        .from('weekly_updates')
-        .update({
-          update_text: updateText,
-          progress_score: score,
-          metric_values: finalMetricValues,
-          submitted_at: new Date().toISOString()
-        })
-        .eq('id', existingUpdate.id)
+      await supabase.from('weekly_updates').update(payload).eq('id', existingUpdate.id)
     } else {
-      await supabase
-        .from('weekly_updates')
-        .insert({
-          okr_id: okr.id,
-          user_id: user!.id,
-          week_start: weekStart,
-          update_text: updateText,
-          progress_score: score,
-          metric_values: finalMetricValues,
-          submitted_at: new Date().toISOString(),
-        })
+      await supabase.from('weekly_updates').insert({
+        okr_id: okr.id,
+        user_id: user!.id,
+        week_start: weekStart,
+        ...payload,
+      })
     }
 
     setSaving(false)
@@ -136,6 +136,11 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
               {hasUpdate && !isEditing && (
                 <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full font-medium">
                   ✓ Submitted
+                </span>
+              )}
+              {hasUpdate && !isEditing && existingUpdate.needs_support && (
+                <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">
+                  ⚑ Needs Support
                 </span>
               )}
             </div>
@@ -190,6 +195,12 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
       {hasUpdate && !isEditing && (
         <div className="px-6 pb-5 border-t border-surface-2 pt-4">
           <p className="text-sm text-ink leading-relaxed">{existingUpdate.update_text}</p>
+          {existingUpdate.needs_support && existingUpdate.support_details && (
+            <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-sm">
+              <p className="text-xs text-red-600 font-medium uppercase tracking-widest mb-1">Support Needed</p>
+              <p className="text-sm text-red-700">{existingUpdate.support_details}</p>
+            </div>
+          )}
           <button
             onClick={() => setIsEditing(true)}
             className="mt-3 text-xs text-muted hover:text-accent underline underline-offset-2 transition-colors"
@@ -204,9 +215,7 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
 
           {metrics.length > 0 && (
             <div>
-              <label className="block text-xs text-muted uppercase tracking-widest mb-3">
-                Weekly Metrics
-              </label>
+              <label className="block text-xs text-muted uppercase tracking-widest mb-3">Weekly Metrics</label>
               <div className="space-y-2">
                 {manualMetrics.map(m => (
                   <div key={m.name} className="flex items-center gap-3">
@@ -229,9 +238,7 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
                         )}
                         {m.type === '%' && <span className="text-sm text-muted">%</span>}
                       </div>
-                      {m.goal && (
-                        <p className="text-xs text-muted mt-0.5">Goal — set by admin</p>
-                      )}
+                      {m.goal && <p className="text-xs text-muted mt-0.5">Goal — set by admin</p>}
                     </div>
                   </div>
                 ))}
@@ -254,9 +261,7 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
           )}
 
           <div>
-            <label className="block text-xs text-muted uppercase tracking-widest mb-2">
-              Progress Score
-            </label>
+            <label className="block text-xs text-muted uppercase tracking-widest mb-2">Progress Score</label>
             <div className="flex gap-2">
               {SCORES.map(s => (
                 <button
@@ -277,9 +282,7 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
           </div>
 
           <div>
-            <label className="block text-xs text-muted uppercase tracking-widest mb-2">
-              Weekly Update
-            </label>
+            <label className="block text-xs text-muted uppercase tracking-widest mb-2">Weekly Update</label>
             <textarea
               value={updateText}
               onChange={e => setUpdateText(e.target.value)}
@@ -287,6 +290,31 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
               placeholder="What progress did you make this week? Any blockers? What's planned next week?"
               className="w-full bg-surface border border-surface-2 rounded-sm px-4 py-3 text-sm text-ink resize-none focus:outline-none focus:border-accent transition-colors"
             />
+          </div>
+
+          {/* Support Toggle */}
+          <div className="border-t border-surface-2 pt-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={needsSupport}
+                onChange={e => {
+                  setNeedsSupport(e.target.checked)
+                  if (!e.target.checked) setSupportDetails('')
+                }}
+                className="w-4 h-4 accent-accent"
+              />
+              <span className="text-sm text-ink">I need support from Tony on this OKR</span>
+            </label>
+            {needsSupport && (
+              <textarea
+                value={supportDetails}
+                onChange={e => setSupportDetails(e.target.value)}
+                rows={3}
+                placeholder="Describe what help you need from Tony..."
+                className="mt-3 w-full bg-red-50 border border-red-200 rounded-sm px-4 py-3 text-sm text-ink resize-none focus:outline-none focus:border-red-400 transition-colors"
+              />
+            )}
           </div>
 
           <div className="flex gap-3 items-center">
