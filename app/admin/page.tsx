@@ -91,7 +91,7 @@ export default async function AdminDashboard() {
         ].map(kpi => (
           <div key={kpi.label} className="bg-white border border-surface-2 rounded-sm p-5">
             <p className="text-xs text-muted uppercase tracking-widest mb-2">{kpi.label}</p>
-            <p className="font-display text-3xl font-bold text-ink">{kpi.value}</p>
+            <p className="font-mono text-3xl font-bold text-ink">{kpi.value}</p>
             <p className="text-xs text-muted mt-1">{kpi.sub}</p>
           </div>
         ))}
