@@ -2,6 +2,14 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+interface Metric {
+  name: string
+  type: '$' | '%' | '#'
+  goal: string
+  calculated: boolean
+  formula: string
+}
+
 interface OKRCardProps {
   okr: {
     id: string
@@ -9,12 +17,14 @@ interface OKRCardProps {
     description: string
     key_results: string[]
     quarter: string
+    metrics?: Metric[]
   }
   existingUpdate: {
     id: string
     update_text: string
     progress_score: number
     submitted_at: string
+    metric_values?: Record<string, string>
   } | null
   weekStart: string
   delay: number
@@ -28,20 +38,50 @@ const SCORES = [
   { value: 5, label: '5', desc: 'Exceeded' },
 ]
 
+const scoreColors: Record<number, string> = {
+  1: 'bg-red-100 text-red-700 border-red-200',
+  2: 'bg-orange-100 text-orange-700 border-orange-200',
+  3: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  4: 'bg-green-100 text-green-700 border-green-200',
+  5: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+}
+
+function computeFormula(formula: string, values: Record<string, string>): string {
+  try {
+    let expr = formula
+    // Replace metric names with their values
+    Object.entries(values).forEach(([name, val]) => {
+      expr = expr.replace(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), val || '0')
+    })
+    // Only allow safe math
+    if (!/^[\d\s\+\-\*\/\(\)\.]+$/.test(expr)) return '—'
+    const result = Function('"use strict"; return (' + expr + ')')()
+    return isFinite(result) ? Number(result).toFixed(2) : '—'
+  } catch {
+    return '—'
+  }
+}
+
 export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [updateText, setUpdateText] = useState(existingUpdate?.update_text || '')
   const [score, setScore] = useState(existingUpdate?.progress_score || 3)
+  const [metricValues, setMetricValues] = useState<Record<string, string>>(
+    existingUpdate?.metric_values || {}
+  )
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const supabase = createClient()
 
-  const scoreColors: Record<number, string> = {
-    1: 'bg-red-100 text-red-700 border-red-200',
-    2: 'bg-orange-100 text-orange-700 border-orange-200',
-    3: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-    4: 'bg-green-100 text-green-700 border-green-200',
-    5: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+  const metrics = okr.metrics || []
+  const manualMetrics = metrics.filter(m => !m.calculated)
+  const calculatedMetrics = metrics.filter(m => m.calculated)
+
+  function formatValue(val: string, type: string) {
+    if (!val) return '—'
+    if (type === '$') return `$${Number(val).toLocaleString()}`
+    if (type === '%') return `${val}%`
+    return val
   }
 
   async function handleSubmit() {
@@ -50,10 +90,21 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
 
     const { data: { user } } = await supabase.auth.getUser()
 
+    // Compute calculated metric values before saving
+    const finalMetricValues = { ...metricValues }
+    calculatedMetrics.forEach(m => {
+      finalMetricValues[m.name] = computeFormula(m.formula, metricValues)
+    })
+
     if (existingUpdate) {
       await supabase
         .from('weekly_updates')
-        .update({ update_text: updateText, progress_score: score, submitted_at: new Date().toISOString() })
+        .update({
+          update_text: updateText,
+          progress_score: score,
+          metric_values: finalMetricValues,
+          submitted_at: new Date().toISOString()
+        })
         .eq('id', existingUpdate.id)
     } else {
       await supabase
@@ -64,6 +115,7 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
           week_start: weekStart,
           update_text: updateText,
           progress_score: score,
+          metric_values: finalMetricValues,
           submitted_at: new Date().toISOString(),
         })
     }
@@ -72,7 +124,6 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
     setSaved(true)
     setIsEditing(false)
     setTimeout(() => setSaved(false), 3000)
-    // Refresh
     window.location.reload()
   }
 
@@ -97,7 +148,6 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
               <p className="text-sm text-muted mt-1">{okr.description}</p>
             )}
           </div>
-
           {hasUpdate && !isEditing && (
             <div className={`shrink-0 px-3 py-1 rounded-sm border text-sm font-semibold ${scoreColors[existingUpdate.progress_score]}`}>
               {existingUpdate.progress_score}/5
@@ -114,6 +164,31 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
                 <span>{kr}</span>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Metrics display (when submitted, not editing) */}
+        {hasUpdate && !isEditing && metrics.length > 0 && existingUpdate.metric_values && (
+          <div className="mt-4 pt-4 border-t border-surface-2">
+            <p className="text-xs text-muted uppercase tracking-widest mb-2">Metrics This Week</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {metrics.map(m => {
+                const val = existingUpdate.metric_values?.[m.name] || '—'
+                return (
+                  <div key={m.name} className="bg-surface rounded-sm px-3 py-2">
+                    <p className="text-xs text-muted truncate">{m.name}</p>
+                    <p className="text-sm font-semibold text-ink mt-0.5">
+                      {m.calculated ? val : formatValue(val, m.type)}
+                      {m.goal && !m.calculated && (
+                        <span className="text-xs text-muted font-normal ml-1">
+                          / {formatValue(m.goal, m.type)}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         )}
       </div>
@@ -134,6 +209,54 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
       {/* Update form */}
       {(!hasUpdate || isEditing) && (
         <div className="px-6 pb-5 border-t border-surface-2 pt-4 space-y-4">
+
+          {/* Metric inputs */}
+          {metrics.length > 0 && (
+            <div>
+              <label className="block text-xs text-muted uppercase tracking-widest mb-3">
+                Weekly Metrics
+              </label>
+              <div className="space-y-2">
+                {manualMetrics.map(m => (
+                  <div key={m.name} className="flex items-center gap-3">
+                    <div className="flex-1">
+                      <label className="block text-xs text-muted mb-1">
+                        {m.name} {m.goal ? `(Goal: ${formatValue(m.goal, m.type)})` : ''}
+                      </label>
+                      <div className="flex items-center gap-1">
+                        {m.type === '$' && <span className="text-sm text-muted">$</span>}
+                        <input
+                          type="number"
+                          value={metricValues[m.name] || ''}
+                          onChange={e => setMetricValues({ ...metricValues, [m.name]: e.target.value })}
+                          className="flex-1 bg-surface border border-surface-2 rounded-sm px-3 py-2 text-sm text-ink focus:outline-none focus:border-accent transition-colors"
+                          placeholder={`Enter current ${m.type === '%' ? 'percentage' : m.type === '$' ? 'amount' : 'value'}`}
+                        />
+                        {m.type === '%' && <span className="text-sm text-muted">%</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Calculated metrics preview */}
+                {calculatedMetrics.length > 0 && (
+                  <div className="pt-2 border-t border-surface-2">
+                    <p className="text-xs text-muted mb-2">Auto-calculated:</p>
+                    {calculatedMetrics.map(m => (
+                      <div key={m.name} className="flex justify-between items-center py-1">
+                        <span className="text-xs text-muted">{m.name}</span>
+                        <span className="text-sm font-semibold text-ink">
+                          {computeFormula(m.formula, metricValues)}{m.type === '%' ? '%' : ''}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Progress Score */}
           <div>
             <label className="block text-xs text-muted uppercase tracking-widest mb-2">
               Progress Score
@@ -157,6 +280,7 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
             <p className="text-xs text-muted mt-1">{SCORES.find(s => s.value === score)?.desc}</p>
           </div>
 
+          {/* Weekly Update */}
           <div>
             <label className="block text-xs text-muted uppercase tracking-widest mb-2">
               Weekly Update
