@@ -98,22 +98,18 @@ export default function UpdatesView({ updates, okrs, profiles, mgmtReports, week
         </div>
       )}
 
-      {/* BY DRI */}
       {viewBy === 'dri' && (() => {
         const allUserIds = Array.from(new Set([
           ...updates.map(u => u.user_id),
           ...mgmtReports.map(r => r.user_id)
         ]))
-
         if (allUserIds.length === 0) return null
-
         return (
           <div className="space-y-6">
             {allUserIds.map(userId => {
               const profile = getProfile(userId)
               const userUpdates = updates.filter(u => u.user_id === userId)
               const mgmtReport = getMgmtReport(userId)
-
               return (
                 <div key={userId} className="bg-white border border-surface-2 rounded-sm overflow-hidden">
                   <div className="px-5 py-3 bg-surface border-b border-surface-2 flex items-center justify-between">
@@ -123,7 +119,6 @@ export default function UpdatesView({ updates, okrs, profiles, mgmtReports, week
                     </div>
                     <span className="text-xs text-muted">{userUpdates.length} OKR update{userUpdates.length !== 1 ? 's' : ''}</span>
                   </div>
-
                   {userUpdates.length > 0 && (
                     <div className="divide-y divide-surface-2">
                       {userUpdates.map(u => {
@@ -156,7 +151,6 @@ export default function UpdatesView({ updates, okrs, profiles, mgmtReports, week
                       })}
                     </div>
                   )}
-
                   {mgmtReport && (
                     <div className="px-5 py-4 bg-surface/50 border-t border-surface-2">
                       <p className="text-xs text-muted uppercase tracking-widest mb-2">Management Report</p>
@@ -185,7 +179,6 @@ export default function UpdatesView({ updates, okrs, profiles, mgmtReports, week
         )
       })()}
 
-      {/* BY ENTITY */}
       {viewBy === 'entity' && (() => {
         const entityMap: Record<string, OKR[]> = {}
         okrs.forEach(okr => {
@@ -193,34 +186,28 @@ export default function UpdatesView({ updates, okrs, profiles, mgmtReports, week
           if (!entityMap[entity]) entityMap[entity] = []
           entityMap[entity].push(okr)
         })
-
         const entities = Object.keys(entityMap).sort()
         if (entities.length === 0) return null
-
         return (
           <div className="space-y-8">
             {entities.map(entity => {
               const entityOkrs = entityMap[entity]
-
               return (
                 <div key={entity}>
                   <h3 className="font-display text-lg font-semibold text-ink mb-3 flex items-center gap-2">
                     <span className="w-2 h-2 bg-accent rounded-full inline-block" />
                     {entity}
                   </h3>
-
                   <div className="space-y-4">
                     {entityOkrs.map(okr => {
                       const okrUpdates = updates.filter(u => u.okr_id === okr.id)
                       const krs = okr.key_results || []
-
                       return (
                         <div key={okr.id} className="bg-white border border-surface-2 rounded-sm overflow-hidden">
                           <div className="px-5 py-3 bg-surface border-b border-surface-2">
                             <p className="text-xs text-muted mb-0.5">{okr.okr_id}</p>
                             <p className="font-medium text-sm text-ink">{okr.title}</p>
                           </div>
-
                           {okrUpdates.length > 0 ? (
                             <table className="w-full text-sm">
                               <thead>
