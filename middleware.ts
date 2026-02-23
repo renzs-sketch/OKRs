@@ -32,13 +32,13 @@ export async function middleware(request: NextRequest) {
 
   // Redirect logged-in users away from login page
   if (user && pathname === '/login') {
-    const isAdmin = user.email === process.env.ADMIN_EMAIL
+    const isAdmin = user.email === 'renz@cho.ventures'
     return NextResponse.redirect(new URL(isAdmin ? '/admin' : '/employee', request.url))
   }
 
   // Protect admin routes
   if (user && pathname.startsWith('/admin')) {
-    if (user.email !== process.env.ADMIN_EMAIL) {
+    if (user.email !== 'renz@cho.ventures') {
       return NextResponse.redirect(new URL('/employee', request.url))
     }
   }
