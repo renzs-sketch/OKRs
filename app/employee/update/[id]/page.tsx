@@ -4,20 +4,25 @@ import { createClient } from '@/lib/supabase/client'
 import { getCurrentWeek } from '@/lib/utils'
 import OKRCard from '@/components/OKRCard'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 export default function UpdateOKRPage({ params }: { params: { id: string } }) {
   const [okr, setOkr] = useState<any>(null)
   const [existingUpdate, setExistingUpdate] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [authed, setAuthed] = useState(false)
   const { weekStart, weekEnd, weekLabel } = getCurrentWeek()
   const supabase = createClient()
-  const router = useRouter()
 
   useEffect(() => {
     async function load() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setLoading(false)
+        return
+      }
+
+      setAuthed(true)
+      const user = session.user
 
       const { data: okrData } = await supabase
         .from('okrs')
@@ -26,7 +31,11 @@ export default function UpdateOKRPage({ params }: { params: { id: string } }) {
         .eq('assigned_to', user.id)
         .single()
 
-      if (!okrData) { router.push('/employee'); return }
+      if (!okrData) {
+        setLoading(false)
+        return
+      }
+
       setOkr(okrData)
 
       const { data: updateData } = await supabase
@@ -45,6 +54,8 @@ export default function UpdateOKRPage({ params }: { params: { id: string } }) {
   }, [params.id])
 
   if (loading) return <div className="text-center py-20 text-muted">Loading...</div>
+  if (!authed) return <div className="text-center py-20 text-muted">Not authenticated.</div>
+  if (!okr) return <div className="text-center py-20 text-muted">OKR not found.</div>
 
   return (
     <div>
@@ -60,14 +71,12 @@ export default function UpdateOKRPage({ params }: { params: { id: string } }) {
         <p className="text-muted mt-2 text-sm">Update your progress for this objective.</p>
       </div>
 
-      {okr && (
-        <OKRCard
-          okr={okr}
-          existingUpdate={existingUpdate}
-          weekStart={weekStart}
-          delay={1}
-        />
-      )}
+      <OKRCard
+        okr={okr}
+        existingUpdate={existingUpdate}
+        weekStart={weekStart}
+        delay={1}
+      />
     </div>
   )
 }
