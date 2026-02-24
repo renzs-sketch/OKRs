@@ -55,10 +55,16 @@ function formatValue(val: string, type: string) {
   return val
 }
 
-function computeFormula(formula: string, values: Record<string, string>): string {
+function computeFormula(formula: string, values: Record<string, string>, metrics?: Metric[]): string {
   try {
-    let expr = formula
-    Object.entries(values).forEach(([name, val]) => {
+    let expr = formula.replace(/^\\?"/, '').replace(/\\?"$/, '')
+    const allValues = { ...values }
+    metrics?.forEach(m => {
+      if (m.goal && !allValues[m.name]) {
+        allValues[m.name] = m.goal
+      }
+    })
+    Object.entries(allValues).forEach(([name, val]) => {
       expr = expr.replace(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), val || '0')
     })
     if (!/^[\d\s\+\-\*\/\(\)\.]+$/.test(expr)) return '—'
@@ -94,7 +100,7 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
 
     const finalMetricValues = { ...metricValues }
     calculatedMetrics.forEach(m => {
-      finalMetricValues[m.name] = computeFormula(m.formula, metricValues)
+      finalMetricValues[m.name] = computeFormula(m.formula, metricValues, metrics)
     })
 
     const payload = {
@@ -250,7 +256,7 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
                       <div key={m.name} className="flex justify-between items-center py-1">
                         <span className="text-xs text-muted">{m.name}</span>
                         <span className="text-sm font-semibold text-ink">
-                          {computeFormula(m.formula, metricValues)}{m.type === '%' ? '%' : ''}
+                          {computeFormula(m.formula, metricValues, metrics)}{m.type === '%' ? '%' : ''}
                         </span>
                       </div>
                     ))}
@@ -292,7 +298,6 @@ export default function OKRCard({ okr, existingUpdate, weekStart, delay }: OKRCa
             />
           </div>
 
-          {/* Support Toggle */}
           <div className="border-t border-surface-2 pt-4">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
