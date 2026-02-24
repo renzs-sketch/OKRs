@@ -30,8 +30,28 @@ function formatValue(val: string, type: string) {
   const num = Number(val)
   if (isNaN(num)) return val
   if (type === '$') return `$${num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
-  if (type === '%') return `${num.toFixed(1)}%`
+  if (type === '%') return `${Math.round(num)}%`
   return num.toLocaleString('en-US')
+}
+
+function computeFormula(formula: string, values: Record<string, string>, metrics?: Metric[]): string {
+  try {
+    let expr = formula.replace(/^\\?"/, '').replace(/\\?"$/, '')
+    const allValues = { ...values }
+    metrics?.forEach(m => {
+      if (m.goal && !allValues[m.name]) {
+        allValues[m.name] = m.goal
+      }
+    })
+    Object.entries(allValues).forEach(([name, val]) => {
+      expr = expr.replace(new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), val || '0')
+    })
+    if (!/^[\d\s\+\-\*\/\(\)\.]+$/.test(expr)) return '—'
+    const result = Function('"use strict"; return (' + expr + ')')()
+    return isFinite(result) ? String(Math.round(result)) : '—'
+  } catch {
+    return '—'
+  }
 }
 
 function ProgressBar({ current, goal }: { current: number; goal: number }) {
@@ -73,11 +93,15 @@ function PercentRing({ value }: { value: number }) {
   )
 }
 
-function MetricCard({ metric, value }: { metric: Metric; value: string }) {
-  const num = Number(value)
+function MetricCard({ metric, value, metrics }: { metric: Metric; value: string; metrics: Metric[] }) {
+  const resolvedValue = metric.calculated
+    ? computeFormula(metric.formula, { [metric.name]: value }, metrics)
+    : value
+
+  const num = Number(resolvedValue)
   const goalNum = Number(metric.goal)
   const hasGoal = metric.goal && !isNaN(goalNum) && goalNum > 0
-  const hasValue = value && value !== '—' && !isNaN(num)
+  const hasValue = resolvedValue && resolvedValue !== '—' && !isNaN(num)
 
   if (metric.type === '%') {
     return (
@@ -92,7 +116,7 @@ function MetricCard({ metric, value }: { metric: Metric; value: string }) {
         )}
         {hasGoal && (
           <p className="text-xs text-muted mt-1">
-            {hasValue ? `Goal: ${metric.goal}%` : 'Goal (no update yet)'}
+            {hasValue ? `Goal: ${Math.round(goalNum)}%` : 'Goal (no update yet)'}
           </p>
         )}
       </div>
@@ -104,7 +128,7 @@ function MetricCard({ metric, value }: { metric: Metric; value: string }) {
       <div className="bg-white border border-surface-2 rounded-sm p-4">
         <p className="text-xs text-muted uppercase tracking-widest truncate">{metric.name}</p>
         <p className="text-2xl font-mono font-bold text-ink mt-2">
-          {hasValue ? formatValue(value, '$') : hasGoal ? formatValue(metric.goal, '$') : '—'}
+          {hasValue ? formatValue(resolvedValue, '$') : hasGoal ? formatValue(metric.goal, '$') : '—'}
         </p>
         {hasGoal && (
           <p className="text-xs text-muted">
@@ -120,7 +144,7 @@ function MetricCard({ metric, value }: { metric: Metric; value: string }) {
     <div className="bg-white border border-surface-2 rounded-sm p-4">
       <p className="text-xs text-muted uppercase tracking-widest truncate">{metric.name}</p>
       <p className="text-2xl font-mono font-bold text-ink mt-2">
-        {hasValue ? formatValue(value, '#') : hasGoal ? formatValue(metric.goal, '#') : '—'}
+        {hasValue ? formatValue(resolvedValue, '#') : hasGoal ? formatValue(metric.goal, '#') : '—'}
       </p>
       {hasGoal && (
         <p className="text-xs text-muted">
@@ -161,7 +185,7 @@ export default function MetricsDashboard({ okrs, updates }: Props) {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {metrics.map(m => {
                     const val = update?.metric_values?.[m.name] || '—'
-                    return <MetricCard key={m.name} metric={m} value={val} />
+                    return <MetricCard key={m.name} metric={m} value={val} metrics={metrics} />
                   })}
                 </div>
               </div>
