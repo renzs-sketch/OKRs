@@ -8,12 +8,6 @@ export default function EmployeePage() {
   const [okrs, setOkrs] = useState<any[]>([])
   const [updates, setUpdates] = useState<Record<string, any>>({})
   const [loading, setLoading] = useState(true)
-  const [reportText, setReportText] = useState('')
-  const [attachmentUrl, setAttachmentUrl] = useState('')
-  const [existingReport, setExistingReport] = useState<any>(null)
-  const [reportSaving, setReportSaving] = useState(false)
-  const [reportSaved, setReportSaved] = useState(false)
-  const [isEditingReport, setIsEditingReport] = useState(false)
   const { weekStart, weekEnd, weekLabel } = getCurrentWeek()
   const supabase = createClient()
 
@@ -47,46 +41,10 @@ export default function EmployeePage() {
         setUpdates(map)
       }
 
-      // Load existing management report
-      const { data: reportData } = await supabase
-        .from('management_reports')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('week_start', weekStart)
-        .single()
-
-      if (reportData) {
-        setExistingReport(reportData)
-        setReportText(reportData.report_text || '')
-        setAttachmentUrl(reportData.attachment_url || '')
-      }
-
       setLoading(false)
     }
     load()
   }, [])
-
-  async function handleReportSubmit() {
-    setReportSaving(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-
-    if (existingReport) {
-      await supabase
-        .from('management_reports')
-        .update({ report_text: reportText, attachment_url: attachmentUrl, submitted_at: new Date().toISOString() })
-        .eq('id', existingReport.id)
-    } else {
-      await supabase
-        .from('management_reports')
-        .insert({ user_id: user.id, week_start: weekStart, report_text: reportText, attachment_url: attachmentUrl })
-    }
-
-    setReportSaving(false)
-    setReportSaved(true)
-    setIsEditingReport(false)
-    setTimeout(() => setReportSaved(false), 3000)
-  }
 
   const submittedCount = Object.keys(updates).length
   const totalCount = okrs.length
@@ -134,77 +92,6 @@ export default function EmployeePage() {
             delay={i + 2}
           />
         ))}
-      </div>
-
-      {/* Management Report Card */}
-      <div className="mt-8 bg-white border border-surface-2 rounded-sm overflow-hidden animate-fadeUp">
-        <div className="px-6 pt-5 pb-4 border-b border-surface-2">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-display font-semibold text-lg text-ink">Weekly Management Report</h3>
-              <p className="text-xs text-muted mt-1">Optional — share anything with leadership not tied to your OKRs</p>
-            </div>
-            {existingReport && !isEditingReport && (
-              <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full font-medium">✓ Submitted</span>
-            )}
-          </div>
-        </div>
-
-        {existingReport && !isEditingReport ? (
-          <div className="px-6 py-5">
-            {existingReport.report_text && (
-              <p className="text-sm text-ink leading-relaxed mb-3">{existingReport.report_text}</p>
-            )}
-            {existingReport.attachment_url && (
-              <a href={existingReport.attachment_url} target="_blank" rel="noopener noreferrer"
-                className="text-xs text-accent underline underline-offset-2">
-                📎 {existingReport.attachment_url}
-              </a>
-            )}
-            <button onClick={() => setIsEditingReport(true)}
-              className="mt-3 block text-xs text-muted hover:text-accent underline underline-offset-2 transition-colors">
-              Edit report
-            </button>
-          </div>
-        ) : (
-          <div className="px-6 py-5 space-y-4">
-            <div>
-              <label className="block text-xs text-muted uppercase tracking-widest mb-2">Report / Notes</label>
-              <textarea
-                value={reportText}
-                onChange={e => setReportText(e.target.value)}
-                rows={5}
-                placeholder="Share any highlights, blockers, wins, or anything you want leadership to know this week..."
-                className="w-full bg-surface border border-surface-2 rounded-sm px-4 py-3 text-sm text-ink resize-none focus:outline-none focus:border-accent transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-xs text-muted uppercase tracking-widest mb-2">Attachment Link (optional)</label>
-              <input
-                value={attachmentUrl}
-                onChange={e => setAttachmentUrl(e.target.value)}
-                placeholder="Paste a Google Doc, Notion, Drive link, etc."
-                className="w-full bg-surface border border-surface-2 rounded-sm px-4 py-3 text-sm text-ink focus:outline-none focus:border-accent transition-colors"
-              />
-            </div>
-            <div className="flex gap-3 items-center">
-              <button
-                onClick={handleReportSubmit}
-                disabled={reportSaving || (!reportText.trim() && !attachmentUrl.trim())}
-                className="bg-ink text-paper px-6 py-2.5 rounded-sm text-sm font-medium hover:bg-accent transition-colors disabled:opacity-50"
-              >
-                {reportSaving ? 'Saving...' : isEditingReport ? 'Update Report' : 'Submit Report'}
-              </button>
-              {isEditingReport && (
-                <button onClick={() => setIsEditingReport(false)}
-                  className="text-sm text-muted hover:text-ink transition-colors">
-                  Cancel
-                </button>
-              )}
-              {reportSaved && <span className="text-xs text-success">✓ Saved!</span>}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )
