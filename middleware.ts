@@ -23,13 +23,20 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user && !request.nextUrl.pathname.startsWith('/login')) {
+  const isLoginPage = request.nextUrl.pathname === '/login'
+
+  if (!user && !isLoginPage) {
     return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  if (user && isLoginPage) {
+    const redirectTo = request.nextUrl.searchParams.get('next') || '/admin'
+    return NextResponse.redirect(new URL(redirectTo, request.url))
   }
 
   return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/employee/:path*'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }
