@@ -1,33 +1,50 @@
-import { createClient } from '@/lib/supabase/server'
+'use client'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { getCurrentWeek } from '@/lib/utils'
 import OKRCard from '@/components/OKRCard'
-import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
-export default async function UpdateOKRPage({ params }: { params: { id: string } }) {
-  const supabase = createClient()
+export default function UpdateOKRPage({ params }: { params: { id: string } }) {
+  const [okr, setOkr] = useState<any>(null)
+  const [existingUpdate, setExistingUpdate] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const { weekStart, weekEnd, weekLabel } = getCurrentWeek()
+  const supabase = createClient()
+  const router = useRouter()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  useEffect(() => {
+    async function load() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
 
-  const { data: okr } = await supabase
-    .from('okrs')
-    .select('*')
-    .eq('id', params.id)
-    .eq('assigned_to', user.id)
-    .single()
+      const { data: okrData } = await supabase
+        .from('okrs')
+        .select('*')
+        .eq('id', params.id)
+        .eq('assigned_to', user.id)
+        .single()
 
-  if (!okr) redirect('/employee')
+      if (!okrData) { router.push('/employee'); return }
+      setOkr(okrData)
 
-  const { data: existingUpdate } = await supabase
-    .from('weekly_updates')
-    .select('*')
-    .eq('okr_id', okr.id)
-    .eq('user_id', user.id)
-    .gte('week_start', weekStart)
-    .lte('week_start', weekEnd)
-    .single()
+      const { data: updateData } = await supabase
+        .from('weekly_updates')
+        .select('*')
+        .eq('okr_id', okrData.id)
+        .eq('user_id', user.id)
+        .gte('week_start', weekStart)
+        .lte('week_start', weekEnd)
+        .maybeSingle()
+
+      setExistingUpdate(updateData || null)
+      setLoading(false)
+    }
+    load()
+  }, [params.id])
+
+  if (loading) return <div className="text-center py-20 text-muted">Loading...</div>
 
   return (
     <div>
@@ -43,12 +60,14 @@ export default async function UpdateOKRPage({ params }: { params: { id: string }
         <p className="text-muted mt-2 text-sm">Update your progress for this objective.</p>
       </div>
 
-      <OKRCard
-        okr={okr}
-        existingUpdate={existingUpdate || null}
-        weekStart={weekStart}
-        delay={1}
-      />
+      {okr && (
+        <OKRCard
+          okr={okr}
+          existingUpdate={existingUpdate}
+          weekStart={weekStart}
+          delay={1}
+        />
+      )}
     </div>
   )
 }
