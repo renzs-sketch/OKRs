@@ -37,6 +37,7 @@ export default async function SubmitUpdatePage() {
               okr={okr}
               existingUpdate={existingUpdate}
               weekStart={weekStart}
+              delay={0}
             />
           )
         })}
