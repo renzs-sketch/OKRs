@@ -198,7 +198,7 @@ export default function LoginPage() {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(to right, #F5F2ED 0%, transparent 18%);
+          background: linear-gradient(to right, #F5F2ED 0%, rgba(245,242,237,0.5) 40%, transparent 70%);
           z-index: 1;
           pointer-events: none;
         }
