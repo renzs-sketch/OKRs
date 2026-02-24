@@ -62,6 +62,18 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </div>
           </div>
 
+          {/* Support Requests */}
+          <div className="group relative">
+            <Link href="/admin/support" className="w-10 h-10 rounded-sm flex items-center justify-center text-muted hover:text-red-500 hover:bg-red-50 transition-colors">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+              </svg>
+            </Link>
+            <div className="absolute left-14 top-1/2 -translate-y-1/2 bg-ink text-paper text-xs px-2 py-1 rounded-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              Support Requests
+            </div>
+          </div>
+
           {/* AI Report */}
           <div className="group relative">
             <Link href="/admin/report" className="w-10 h-10 rounded-sm flex items-center justify-center text-muted hover:text-ink hover:bg-surface transition-colors">
