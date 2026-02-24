@@ -14,7 +14,7 @@ export default async function EmployeeLayout({ children }: { children: React.Rea
         </div>
 
         <nav className="flex flex-col items-center gap-1 flex-1">
-          {/* Home */}
+          {/* Home / OKR Overview */}
           <div className="group relative">
             <Link href="/employee" className="w-10 h-10 rounded-sm flex items-center justify-center text-muted hover:text-ink hover:bg-surface transition-colors">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -23,19 +23,7 @@ export default async function EmployeeLayout({ children }: { children: React.Rea
               </svg>
             </Link>
             <div className="absolute left-14 top-1/2 -translate-y-1/2 bg-ink text-paper text-xs px-2 py-1 rounded-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              Home
-            </div>
-          </div>
-
-          {/* Submit Update */}
-          <div className="group relative">
-            <Link href="/employee/update" className="w-10 h-10 rounded-sm flex items-center justify-center text-muted hover:text-ink hover:bg-surface transition-colors">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-            </Link>
-            <div className="absolute left-14 top-1/2 -translate-y-1/2 bg-ink text-paper text-xs px-2 py-1 rounded-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              Submit Update
+              My OKRs
             </div>
           </div>
 
