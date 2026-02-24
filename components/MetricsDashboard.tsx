@@ -114,10 +114,8 @@ function MetricCard({ metric, value, metrics }: { metric: Metric; value: string;
         ) : (
           <p className="text-2xl font-mono font-bold text-ink mt-2">—</p>
         )}
-        {hasGoal && (
-          <p className="text-xs text-muted mt-1">
-            {hasValue ? `Goal: ${Math.round(goalNum)}%` : 'Goal (no update yet)'}
-          </p>
+        {hasGoal && hasValue && (
+          <p className="text-xs text-muted mt-1">Goal: {Math.round(goalNum)}%</p>
         )}
       </div>
     )
@@ -130,10 +128,8 @@ function MetricCard({ metric, value, metrics }: { metric: Metric; value: string;
         <p className="text-2xl font-mono font-bold text-ink mt-2">
           {hasValue ? formatValue(resolvedValue, '$') : hasGoal ? formatValue(metric.goal, '$') : '—'}
         </p>
-        {hasGoal && (
-          <p className="text-xs text-muted">
-            {hasValue ? `Goal: ${formatValue(metric.goal, '$')}` : 'Goal (no update yet)'}
-          </p>
+        {hasGoal && hasValue && (
+          <p className="text-xs text-muted">Goal: {formatValue(metric.goal, '$')}</p>
         )}
         {hasValue && hasGoal && <ProgressBar current={num} goal={goalNum} />}
       </div>
@@ -146,10 +142,8 @@ function MetricCard({ metric, value, metrics }: { metric: Metric; value: string;
       <p className="text-2xl font-mono font-bold text-ink mt-2">
         {hasValue ? formatValue(resolvedValue, '#') : hasGoal ? formatValue(metric.goal, '#') : '—'}
       </p>
-      {hasGoal && (
-        <p className="text-xs text-muted">
-          {hasValue ? `Goal: ${formatValue(metric.goal, '#')}` : 'Goal (no update yet)'}
-        </p>
+      {hasGoal && hasValue && (
+        <p className="text-xs text-muted">Goal: {formatValue(metric.goal, '#')}</p>
       )}
       {hasValue && hasGoal && <ProgressBar current={num} goal={goalNum} />}
     </div>
