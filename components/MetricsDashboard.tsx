@@ -93,9 +93,14 @@ function PercentRing({ value }: { value: number }) {
   )
 }
 
-function MetricCard({ metric, value, metrics }: { metric: Metric; value: string; metrics: Metric[] }) {
+function MetricCard({ metric, value, metrics, allValues }: {
+  metric: Metric
+  value: string
+  metrics: Metric[]
+  allValues: Record<string, string>
+}) {
   const resolvedValue = metric.calculated
-    ? computeFormula(metric.formula, { [metric.name]: value }, metrics)
+    ? computeFormula(metric.formula, allValues, metrics)
     : value
 
   const num = Number(resolvedValue)
@@ -179,7 +184,16 @@ export default function MetricsDashboard({ okrs, updates }: Props) {
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {metrics.map(m => {
                     const val = update?.metric_values?.[m.name] || '—'
-                    return <MetricCard key={m.name} metric={m} value={val} metrics={metrics} />
+                    const allValues = update?.metric_values || {}
+                    return (
+                      <MetricCard
+                        key={m.name}
+                        metric={m}
+                        value={val}
+                        metrics={metrics}
+                        allValues={allValues}
+                      />
+                    )
                   })}
                 </div>
               </div>
