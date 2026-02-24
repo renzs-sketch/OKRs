@@ -29,7 +29,10 @@ export default function LoginPage() {
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body { background: #EDE8E3; }
+        body {
+          background-color: #EDE8E3;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+        }
 
         .login-root {
           min-height: 100vh;
@@ -37,7 +40,6 @@ export default function LoginPage() {
           align-items: center;
           justify-content: center;
           padding: 32px 24px;
-          background: #EDE8E3;
         }
 
         .login-card {
