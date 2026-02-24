@@ -25,7 +25,7 @@ export default function LoginPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Birthstone&family=Roboto+Flex:opsz,wght,wdth@8..144,700,112&family=DM+Sans:wght@300;400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Birthstone&family=Roboto+Condensed:wght@700&family=DM+Sans:wght@300;400&display=swap');
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -66,10 +66,10 @@ export default function LoginPage() {
         }
 
         .brand-mark {
-          font-family: 'Roboto Flex', sans-serif;
+          font-family: 'Roboto Condensed', sans-serif;
           font-weight: 700;
-          font-size: 22px;
-          letter-spacing: 0.25em;
+          font-size: 28px;
+          letter-spacing: 0.15em;
           color: #2C2824;
           text-transform: uppercase;
         }
