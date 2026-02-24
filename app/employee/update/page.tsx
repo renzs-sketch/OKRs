@@ -37,7 +37,6 @@ export default async function SubmitUpdatePage() {
               okr={okr}
               existingUpdate={existingUpdate}
               weekStart={weekStart}
-              userId={user?.id || ''}
             />
           )
         })}
