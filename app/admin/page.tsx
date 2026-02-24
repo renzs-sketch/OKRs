@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentWeek } from '@/lib/utils'
 import Link from 'next/link'
+import MetricsDashboard from '@/components/MetricsDashboard'
 
 export default async function AdminDashboard() {
   const supabase = createClient()
@@ -59,6 +60,8 @@ export default async function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      <MetricsDashboard okrs={okrs || []} updates={updates || []} />
 
       <div className="animate-fadeUp delay-3">
         <h2 className="font-display text-xl font-semibold text-ink mb-4">Pending Submissions</h2>
