@@ -25,7 +25,7 @@ export default function LoginPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Birthstone&family=Roboto+Flex:opsz,wght,wdth@8..144,700,112&family=DM+Sans:wght@300;400&display=swap');
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -66,10 +66,10 @@ export default function LoginPage() {
         }
 
         .brand-mark {
-          font-family: 'Cormorant Garamond', serif;
-          font-weight: 500;
-          font-size: 15px;
-          letter-spacing: 0.3em;
+          font-family: 'Roboto Flex', sans-serif;
+          font-weight: 700;
+          font-size: 22px;
+          letter-spacing: 0.25em;
           color: #2C2824;
           text-transform: uppercase;
         }
@@ -88,13 +88,12 @@ export default function LoginPage() {
         }
 
         .form-title {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: 'Birthstone', cursive;
           font-weight: 400;
-          font-size: 28px;
+          font-size: 42px;
           color: #8C8279;
           line-height: 1.1;
           margin-bottom: 6px;
-          letter-spacing: 0.02em;
         }
 
         .form-tagline {
@@ -212,7 +211,7 @@ export default function LoginPage() {
         }
 
         .right-panel-caption p {
-          font-family: 'Cormorant Garamond', serif;
+          font-family: 'DM Sans', sans-serif;
           font-style: italic;
           font-weight: 300;
           font-size: 12px;
@@ -280,7 +279,7 @@ export default function LoginPage() {
               alt="Nature"
             />
             <div className="right-panel-caption">
-              <p>Weekly accountability, simplified.</p>
+              <p>Your weekly pulse check.</p>
             </div>
           </div>
 
