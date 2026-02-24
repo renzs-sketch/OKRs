@@ -85,10 +85,16 @@ function MetricCard({ metric, value }: { metric: Metric; value: string }) {
         <p className="text-xs text-muted uppercase tracking-widest truncate">{metric.name}</p>
         {hasValue ? (
           <PercentRing value={num} />
+        ) : hasGoal ? (
+          <PercentRing value={goalNum} />
         ) : (
           <p className="text-2xl font-mono font-bold text-ink mt-2">—</p>
         )}
-        {hasGoal && <p className="text-xs text-muted mt-1">Goal: {metric.goal}%</p>}
+        {hasGoal && (
+          <p className="text-xs text-muted mt-1">
+            {hasValue ? `Goal: ${metric.goal}%` : 'Goal (no update yet)'}
+          </p>
+        )}
       </div>
     )
   }
@@ -98,22 +104,29 @@ function MetricCard({ metric, value }: { metric: Metric; value: string }) {
       <div className="bg-white border border-surface-2 rounded-sm p-4">
         <p className="text-xs text-muted uppercase tracking-widest truncate">{metric.name}</p>
         <p className="text-2xl font-mono font-bold text-ink mt-2">
-          {hasValue ? formatValue(value, '$') : '—'}
+          {hasValue ? formatValue(value, '$') : hasGoal ? formatValue(metric.goal, '$') : '—'}
         </p>
-        {hasGoal && <p className="text-xs text-muted">Goal: {formatValue(metric.goal, '$')}</p>}
+        {hasGoal && (
+          <p className="text-xs text-muted">
+            {hasValue ? `Goal: ${formatValue(metric.goal, '$')}` : 'Goal (no update yet)'}
+          </p>
+        )}
         {hasValue && hasGoal && <ProgressBar current={num} goal={goalNum} />}
       </div>
     )
   }
 
-  // # type
   return (
     <div className="bg-white border border-surface-2 rounded-sm p-4">
       <p className="text-xs text-muted uppercase tracking-widest truncate">{metric.name}</p>
       <p className="text-2xl font-mono font-bold text-ink mt-2">
-        {hasValue ? formatValue(value, '#') : '—'}
+        {hasValue ? formatValue(value, '#') : hasGoal ? formatValue(metric.goal, '#') : '—'}
       </p>
-      {hasGoal && <p className="text-xs text-muted">Goal: {formatValue(metric.goal, '#')}</p>}
+      {hasGoal && (
+        <p className="text-xs text-muted">
+          {hasValue ? `Goal: ${formatValue(metric.goal, '#')}` : 'Goal (no update yet)'}
+        </p>
+      )}
       {hasValue && hasGoal && <ProgressBar current={num} goal={goalNum} />}
     </div>
   )
