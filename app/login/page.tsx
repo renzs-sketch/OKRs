@@ -276,7 +276,7 @@ export default function LoginPage() {
 
           <div className="right-panel">
             <img
-              src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80&fit=crop"
+              src="https://drive.google.com/uc?export=view&id=1_lJv3sXnynZn_FcnVkOVdSpFo-fEJmM4"
               alt="Nature"
             />
             <div className="right-panel-caption">
